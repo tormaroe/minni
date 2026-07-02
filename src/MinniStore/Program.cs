@@ -1,3 +1,5 @@
+using MinniStore.Storage;
+
 namespace MinniStore;
 
 public class Program
@@ -32,10 +34,17 @@ public class Program
             // Register parsed command-line options as a singleton
             builder.Services.AddSingleton(options);
 
+            // Register storage engine
+            builder.Services.AddSingleton<IStorageEngine, StorageEngine>();
+
             // Add standard console logging
             builder.Logging.AddConsole();
 
             var app = builder.Build();
+
+            // Initialize the StorageEngine before running the web app
+            var storageEngine = app.Services.GetRequiredService<IStorageEngine>();
+            storageEngine.InitializeAsync().GetAwaiter().GetResult();
 
             app.MapGet("/", () => "Hello World!");
 
