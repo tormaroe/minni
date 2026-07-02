@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/MinniStore/MinniStore.csproj" />
+  <Project Path="tests/MinniStore.Tests/MinniStore.Tests.csproj" />
+</Solution>
