@@ -18,10 +18,87 @@ Start the database server:
 minni --port 25000 --db databasefile.db
 ```
 
-Clients can then interact with the database via HTTP endpoints:
-- `GET /streams/{aggregateId}` - Retrieve all events for an aggregate.
-- `POST /streams/{aggregateId}` - Append one or more events to an aggregate.
-- `GET /metrics` - Retrieve server status and performance metrics.
+Alternatively, you can build and run using `just`:
+```bash
+just run
+```
+
+---
+
+## REST API Reference
+
+### 1. Append Events
+Appends one or more events to a stream.
+
+* **Method**: `POST`
+* **Route**: `/streams/{aggregateId}`
+* **Headers**:
+  * `If-Match`: (Optional) Expected version of the stream (integer encapsulated in double-quotes, e.g., `"4"`). Matches the number of events in the stream prior to this append.
+* **Request Body**:
+  ```json
+  {
+    "expectedVersion": 4, // Optional alternative to the If-Match header
+    "events": [
+      {
+        "data": "eyJrZXkiOiAidmFsdWUtMSJ9" // Base64-encoded string of event bytes
+      }
+    ]
+  }
+  ```
+* **Success Response (`201 Created`)**:
+  ```json
+  {
+    "aggregateId": "order-1029",
+    "currentVersion": 5
+  }
+  ```
+* **Error Responses**:
+  * `409 Conflict`: Concurrency conflict (expected version mismatch).
+  * `400 Bad Request`: Missing body, empty events array, invalid base64 data, or conflicting version specification.
+
+---
+
+### 2. Retrieve Stream
+Retrieves events from a specific stream.
+
+* **Method**: `GET`
+* **Route**: `/streams/{aggregateId}`
+* **Query Parameters**:
+  * `fromVersion`: (Optional, default = `1`) Read events starting from this sequence number (inclusive).
+* **Success Response (`200 OK`)**:
+  ```json
+  [
+    {
+      "sequenceNumber": 1,
+      "timestamp": 1782930292300,
+      "data": "eyJrZXkiOiAidmFsdWUtMSJ9" // Base64-encoded string of event bytes
+    }
+  ]
+  ```
+* **Error Responses**:
+  * `400 Bad Request`: `fromVersion` is less than 1.
+
+---
+
+## Utility Scripts
+
+We provide helper bash scripts inside the [scripts/](file:///C:/dev/minnistore/scripts) folder for quick testing:
+
+### Post an Event
+Appends a JSON payload to a stream:
+```bash
+./scripts/post-event.sh <aggregate-id> '<json-payload>'
+# Example:
+./scripts/post-event.sh order-1029 '{"status": "Created", "itemsCount": 3}'
+```
+
+### Retrieve Events
+Fetches and decodes the stream events into a human-readable format:
+```bash
+./scripts/get-events.sh <aggregate-id>
+# Example:
+./scripts/get-events.sh order-1029
+```
 
 ## License
 Licensed under the [MIT License](file:///C:/dev/minnistore/LICENSE).
