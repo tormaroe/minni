@@ -1,5 +1,9 @@
 # MinniStore (Minni)
 
+<p align="center">
+  <img src="gfx/Minni-owl.png" alt="Minni Logo" width="150" />
+</p>
+
 MinniStore is a lightweight, high-performance event store database management system written in C# (.NET). It stores immutable events in an append-only single-file database on disk and exposes a HTTP REST API for operations.
 
 ## Key Features
