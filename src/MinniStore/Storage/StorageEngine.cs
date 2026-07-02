@@ -243,7 +243,7 @@ public class StorageEngine : IStorageEngine, IDisposable
         return Task.FromResult<IReadOnlyList<EventRecord>>(results);
     }
 
-    public async Task<int> WriteEventsAsync(string aggregateId, IEnumerable<byte[]> events, int expectedVersion)
+    public async Task<int> WriteEventsAsync(string aggregateId, IEnumerable<byte[]> events, int? expectedVersion)
     {
         if (string.IsNullOrWhiteSpace(aggregateId))
         {
@@ -268,9 +268,9 @@ public class StorageEngine : IStorageEngine, IDisposable
                 currentVersion = existingEntries.Count;
             }
 
-            if (currentVersion != expectedVersion)
+            if (expectedVersion.HasValue && currentVersion != expectedVersion.Value)
             {
-                throw new ConcurrencyConflictException(aggregateId, expectedVersion, currentVersion);
+                throw new ConcurrencyConflictException(aggregateId, expectedVersion.Value, currentVersion);
             }
 
             offsetRollback = _fileStream.Length;

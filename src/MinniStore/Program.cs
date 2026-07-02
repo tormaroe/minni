@@ -1,4 +1,5 @@
 using MinniStore.Storage;
+using MinniStore.API;
 
 namespace MinniStore;
 
@@ -47,6 +48,7 @@ public class Program
             storageEngine.InitializeAsync().GetAwaiter().GetResult();
 
             app.MapGet("/", () => "Hello World!");
+            app.MapStreamEndpoints();
 
             app.Run();
             return 0;
